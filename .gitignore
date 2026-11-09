@@ -1,0 +1,23 @@
+# Dependencies and build output
+node_modules/
+api/node_modules/
+api/dist/
+dist/
+coverage/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Generated and temporary files
+*.log
+*.tmp
+*.swp
+.DS_Store
+.npm/
+*.tsbuildinfo
+
+# Prisma generated artifacts
+api/src/generated/prisma/
+

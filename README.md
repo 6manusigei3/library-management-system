@@ -1,6 +1,6 @@
 # Library Management System
 
-A university assignment data layer for a library catalog, built with NestJS, Prisma, and PostgreSQL. It models users and roles, genres, books, and optional user reviews. Books reference genres through a relational foreign key.
+A university assignment REST API for a library catalog, built with NestJS, Prisma, and PostgreSQL. It models users and roles, genres, books, and optional user reviews. Books reference genres through a relational foreign key.
 
 ## Technologies
 
@@ -19,10 +19,11 @@ A university assignment data layer for a library catalog, built with NestJS, Pri
 │   │   ├── schema.prisma
 │   │   └── seed.ts
 │   ├── src/
-│   │   ├── books/            # Book data access service
-│   │   ├── genres/           # Genre data access service
+│   │   ├── auth/             # Registration, login, JWT and role guards
+│   │   ├── books/            # Book CRUD and catalog search
+│   │   ├── genres/           # Genre CRUD
 │   │   ├── prisma/           # Shared Prisma client module and service
-│   │   ├── users/            # User data access service
+│   │   ├── users/            # User data and authenticated profile
 │   │   ├── app.module.ts
 │   │   └── main.ts
 │   ├── .env.example
@@ -45,20 +46,22 @@ Copy `api/.env.example` to `api/.env` and replace the placeholders with connecti
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+JWT_SECRET="replace-with-a-long-random-secret"
 ```
 
 Keep `.env` private; it is excluded by `.gitignore`. Do not commit credentials.
 
 ## Prisma migrations
 
-With `DATABASE_URL` configured and the PostgreSQL server reachable, create/apply the initial development migration:
+The initial migration is checked in at `api/prisma/migrations/20261109000000_init/migration.sql`. The later additive migration adds authentication/book fields without resetting existing data. With `DATABASE_URL` configured and the PostgreSQL server reachable, apply pending migrations:
 
 ```bash
 cd api
-npx prisma migrate dev --name init
+npx prisma migrate deploy
+npm run prisma:generate
 ```
 
-The checked-in initial migration is at `api/prisma/migrations/20261109000000_init/migration.sql`. To apply existing migrations in a deployment environment, use `npx prisma migrate deploy` from `api`.
+`migrate deploy` applies checked-in migrations without resetting the database.
 
 ## Database seeding
 
@@ -73,14 +76,16 @@ The seed script safely upserts four genres and twenty books, with five books ass
 
 ## Run the application
 
-After setting the environment and applying the migration:
+After configuring the environment and applying migrations, run the application:
 
 ```bash
 cd api
 npm run start:dev
 ```
 
-The NestJS app listens on port 3000 by default (or the `PORT` environment variable). The data layer exposes injectable `BooksService`, `GenresService`, and `UsersService` classes. No HTTP controllers are included because this assignment focuses on the data layer.
+The NestJS app listens on port 3000 by default (or the `PORT` environment variable). It exposes CRUD APIs for books and genres, registration and login, and an authenticated user profile. Book creation, updates, and deletion require a librarian JWT; catalog reads are public.
+
+The Postman collection at `api/docs/postman_collection.json` includes requests for each endpoint and uses `base_url`, `jwt_token`, and resource ID variables.
 
 Useful local checks:
 
@@ -88,6 +93,7 @@ Useful local checks:
 npm run prisma:validate
 npm run prisma:generate
 npm run typecheck
+npm run lint
 npm run build
 ```
 

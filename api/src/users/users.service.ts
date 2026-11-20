@@ -18,4 +18,18 @@ export class UsersService {
       orderBy: { name: 'asc' },
     });
   }
+
+  findById(id: string) {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
 }
